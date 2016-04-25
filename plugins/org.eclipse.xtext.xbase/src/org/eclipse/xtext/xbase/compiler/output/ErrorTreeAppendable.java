@@ -7,6 +7,7 @@
  *******************************************************************************/
 package org.eclipse.xtext.xbase.compiler.output;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
@@ -18,6 +19,7 @@ import org.eclipse.xtext.generator.trace.ILocationData;
 import org.eclipse.xtext.generator.trace.ITraceURIConverter;
 import org.eclipse.xtext.linking.lazy.LazyLinkingResource;
 import org.eclipse.xtext.linking.lazy.LazyURIEncoder;
+import org.eclipse.xtext.nodemodel.ILeafNode;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.resource.ILocationInFileProvider;
 import org.eclipse.xtext.util.Triple;
@@ -57,7 +59,18 @@ public class ErrorTreeAppendable extends TreeAppendable {
 			Triple<EObject, EReference, INode> unresolvedLink = encoder.decode(getState().getResource(), fragment);
 			if(unresolvedLink != null) {
 				INode linkNode = unresolvedLink.getThird();
+				
 				if(linkNode != null) {
+					Iterator<ILeafNode> it = linkNode.getLeafNodes().iterator();
+					ILeafNode child = it.hasNext() ? it.next() : null;
+					while(child != null && child.isHidden() && it.hasNext()) {
+						child = it.next();
+					}
+					
+					if(child != null) {
+						linkNode = child;
+					}
+
 					append(linkNode.getText().trim());
 					return this;
 				}
